@@ -1,84 +1,85 @@
-# API Documentation
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
-## Base URL
+const captainSchema = new mongoose.Schema({
+    fullname: {
+        firstname: {
+            type: String,
+            required: true,
+            minlength: [3, 'Name must be at least 3 characters long'],
+        },
+        lastname: {
+            type: String,
+            minlength: [3, 'Last Name must be at least 3 characters long'],
+        }
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        match: [/\S+@\S+\.\S+/, 'Please enter a valid email'],
+    },
+    socketId: {
+        type: String,
+    },
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'inactive'
+    },
+    vehicle: {
+        color: {
+            type: String,
+            required: true,
+            minlength: [3, 'Color must be at least 3 characters long'],
+        },
+        plate: {
+            type: String,
+            required: true,
+            minlength: [3, 'Plate must be at least 3 characters long'],
+        },
+        capacity: {
+            type: Number,
+            required: true,
+            min: [1, 'Capacity must be at least 1'],
+        },
+        vehicleType: {
+            type: String,
+            required: true,
+            enum: ['motorcycle', 'car', 'auto'],
+        },
+        location: {
+            lat: {
+                type: Number,
+            },
+            lng: {
+                type: Number,
+            },
+        },
+    },
+    password: {
+        type: String,
+        required: true,
+        select: false
+    }
+});
 
-`http://localhost:4000/`
+captainSchema.methods.generateAuthToken = function() {
+    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    return token;
+}
 
-## User Routes
+captainSchema.methods.comparePassword = async function(password) {
+    if (!password || !this.password) {
+        throw new Error('data and hash arguments required');
+    }
+    return await bcrypt.compare(password, this.password);
+};
 
-### Register User
+captainSchema.statics.hashPassword = async function(password) {
+    return await bcrypt.hash(password, 10);
+};
 
-**URL:** `/users/register`
-
-**Method:** `POST`
-
-**Body Parameters:**
-- `email` (string): User's email address. Must be a valid email.
-- `fullname.firstname` (string): User's first name. Must be at least 3 characters long.
-- `password` (string): User's password. Must be at least 6 characters long.
-
-**Response:**
-- `201 Created`: Returns the generated token and user details.
-- `400 Bad Request`: Returns validation errors.
-
-### Login User
-
-**URL:** `/users/login`
-
-**Method:** `POST`
-
-**Body Parameters:**
-- `email` (string): User's email address. Must be a valid email.
-- `password` (string): User's password. Must be at least 6 characters long.
-
-**Response:**
-- `200 OK`: Returns the generated token and user details.
-- `400 Bad Request`: Returns validation errors.
-- `404 Not Found`: Returns if the email or password is invalid.
-
-### Get User Profile
-
-**URL:** `/users/profile`
-
-**Method:** `GET`
-
-**Headers:**
-- `Authorization`: Bearer token.
-
-**Response:**
-- `200 OK`: Returns the user's profile details.
-- `401 Unauthorized`: Returns if the user is not authenticated.
-
-### Logout User
-
-**URL:** `/users/logout`
-
-**Method:** `GET`
-
-**Headers:**
-- `Authorization`: Bearer token.
-
-**Response:**
-- `200 OK`: Returns a success message.
-- `401 Unauthorized`: Returns if the user is not authenticated.
-
-## Captain Routes
-
-### Register Captain
-
-**URL:** `/captains/register`
-
-**Method:** `POST`
-
-**Body Parameters:**
-- `email` (string): Captain's email address. Must be a valid email.
-- `fullname.firstname` (string): Captain's first name. Must be at least 3 characters long.
-- `password` (string): Captain's password. Must be at least 6 characters long.
-- `vehicle.color` (string): Vehicle color. Must be at least 3 characters long.
-- `vehicle.plate` (string): Vehicle plate number. Must be at least 3 characters long.
-- `vehicle.capacity` (number): Vehicle capacity. Must be a number.
-- `vehicle.vehicleType` (string): Vehicle type. Must be one of 'motorcycle', 'car', 'auto'.
-
-**Response:**
-- `201 Created`: Returns the generated token and captain details.
-- `400 Bad Request`: Returns validation errors.
+module.exports = mongoose.model('Captain', captainSchema);

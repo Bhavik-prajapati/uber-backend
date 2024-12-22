@@ -58,6 +58,11 @@ const captainSchema = new mongoose.Schema({
                 type: Number,
             },
         },
+    },
+    password: {
+        type: String,
+        required: true,
+        select: false
     }
 });
 
@@ -67,11 +72,13 @@ captainSchema.methods.generateAuthToken = function() {
 }
 
 captainSchema.methods.comparePassword = async function(password) {
+   console.log(this.password,"this..,,,,,,,,,")
     return await bcrypt.compare(password, this.password);
-}
+};
 
 captainSchema.statics.hashPassword = async function(password) {
     return await bcrypt.hash(password, 10);
-}
+};
+
 
 module.exports = mongoose.model('Captain', captainSchema);
