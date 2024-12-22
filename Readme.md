@@ -1,109 +1,57 @@
-Here is the documentation for the provided URLs:
+# User Routes
 
-## API Documentation
+## Register User
 
-### POST `/users/register`
+**URL:** `/register`
 
-Registers a new user.
+**Method:** `POST`
 
-#### Request Body
-- `email` (string): The email of the user. Must be a valid email address.
-- `fullname.firstname` (string): The first name of the user. Must be at least 3 characters long.
-- `password` (string): The password of the user. Must be at least 6 characters long.
+**Body Parameters:**
+- `email` (string): User's email address. Must be a valid email.
+- `fullname.firstname` (string): User's first name. Must be at least 3 characters long.
+- `password` (string): User's password. Must be at least 6 characters long.
 
-#### Response
-- `201 Created`: User successfully registered.
-  - `token` (string): Authentication token.
-  - 
+**Response:**
+- `201 Created`: Returns the generated token and user details.
+- `400 Bad Request`: Returns validation errors.
 
-user
+## Login User
 
- (object): The created user object.
-- `400 Bad Request`: Validation errors.
-  - 
+**URL:** `/login`
 
-errors
+**Method:** `POST`
 
- (array): Array of validation error messages.
+**Body Parameters:**
+- `email` (string): User's email address. Must be a valid email.
+- `password` (string): User's password. Must be at least 6 characters long.
 
-#### Example Request
-```json
-{
-  "email": "user@example.com",
-  "fullname": {
-    "firstname": "John"
-  },
-  "password": "password123"
+**Response:**
+- `200 OK`: Returns the generated token and user details.
+- `400 Bad Request`: Returns validation errors.
+- `404 Not Found`: Returns if the email or password is invalid.
 
+## Get User Profile
 
-}
+**URL:** `/profile`
 
+**Method:** `GET`
 
-```
+**Headers:**
+- `Authorization`: Bearer token.
 
-#### Example Response
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "_id": "60c72b2f9b1d8c001c8e4e3b",
-    "email": "user@example.com",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    }
-  }
-}
-```
+**Response:**
+- `200 OK`: Returns the user's profile details.
+- `401 Unauthorized`: Returns if the user is not authenticated.
 
-### POST `/users/login`
+## Logout User
 
-Logs in an existing user.
+**URL:** `/logout`
 
-#### Request Body
-- `email` (string): The email of the user. Must be a valid email address.
-- `password` (string): The password of the user. Must be at least 6 characters long.
+**Method:** `GET`
 
-#### Response
-- `200 OK`: User successfully logged in.
-  - `token` (string): Authentication token.
-  - 
+**Headers:**
+- `Authorization`: Bearer token.
 
-user
-
- (object): The logged-in user object.
-- `400 Bad Request`: Validation errors.
-  - 
-
-errors
-
- (array): Array of validation error messages.
-- `404 Not Found`: Invalid email or password.
-  - 
-
-message
-
- (string): Error message.
-
-#### Example Request
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-#### Example Response
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "_id": "60c72b2f9b1d8c001c8e4e3b",
-    "email": "user@example.com",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    }
-  }
-}
-```
+**Response:**
+- `200 OK`: Returns a success message.
+- `401 Unauthorized`: Returns if the user is not authenticated.
